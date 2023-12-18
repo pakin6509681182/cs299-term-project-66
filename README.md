@@ -8,6 +8,7 @@
 - Blender 3.6  
 For 3D Modelling
 - Three.JS
+- HTML , CSS , JS
 - VS Code
 
 ## Feature
