@@ -33,9 +33,9 @@ For 3D Modelling
 - Web Browser with Internet Connection
 ## How to run the project
 1. Clone the project
-```git
-git clone https://github.com/pakin6509681182/cs299-term-project-66.git  
-```
+    ```git
+    git clone https://github.com/pakin6509681182/cs299-term-project-66.git  
+    ```
 2. Open Terminal(Mac) or Command Prompt(Windows) and change directory to the project folder
 3. Run the following command
     ```python
@@ -45,3 +45,8 @@ git clone https://github.com/pakin6509681182/cs299-term-project-66.git
 4. Open your web browser and go to http://localhost:8000/  
 5. Open CS299_TermProject_Frog.html  
 6. Enjoy the Froggy
+
+## Team Member
+- [Pakin Pratkittikul](https://github.com/pakin6509681182) - HTML,CSS,JS
+- [Meantisiyakorn Suppraphakorn](https://github.com/Meantisiyakorn6509611973) - 3D Modeling
+- [Thanaphon Siriwat](https://github.com/thanaphon-6509611742) - 3D Modeling
