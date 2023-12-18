@@ -41,5 +41,7 @@ git clone https://github.com/pakin6509681182/cs299-term-project-66.git
 ```python
 python -m http.server
 ```
-4. Open your web browser and go to http://localhost:8000/
-5. Enjoy the Froggy
+Or use can use any other method to run a local server  
+4. Open your web browser and go to http://localhost:8000/  
+5. Open CS299_TermProject_Frog.html  
+6. Enjoy the Froggy
