@@ -38,10 +38,10 @@ git clone https://github.com/pakin6509681182/cs299-term-project-66.git
 ```
 2. Open Terminal(Mac) or Command Prompt(Windows) and change directory to the project folder
 3. Run the following command
-```python
-python -m http.server
-```
-Or use can use any other method to run a local server  
+    ```python
+    python -m http.server
+    ```
+    Or use can use any other method to run a local server  
 4. Open your web browser and go to http://localhost:8000/  
 5. Open CS299_TermProject_Frog.html  
 6. Enjoy the Froggy
