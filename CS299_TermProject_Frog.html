@@ -1,0 +1,533 @@
+<!-- CSS299 Example, adopted from https://threejsfundamentals.org -->
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title>CS299 TermProject_Frog</title>
+  <style type="text/css">
+    html, body { height: 100%; margin: 0; }
+    #c { width: 100%; height: 100%; display: block; }
+    #canvasContainer {
+      position: relative;
+    }
+    #colorText {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      color: white;
+      background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent black background */
+      padding: 5px;
+      font-family: Arial, sans-serif; /* Arial font */
+      font-size: 20px; /* 16px font size */
+      display: none; /* Hide the text by default */
+    }
+    #loadingText {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%); /* Center the text */
+      color: white;
+      background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent black background */
+      padding: 5px;
+      font-family: Arial, sans-serif; /* Arial font */
+      font-size: 20px;
+      display: none; /* Hide the text by default */
+    }
+    #descriptionText {
+      position: absolute;
+      top: 47px; /* Adjust this value as needed */
+      left: 10px;
+      color: white;
+      background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent black background */
+      padding: 5px;
+      font-family: Arial, sans-serif; /* Arial font */
+      display: none; /* Hide the text by default */
+    }
+    .play-sound-button {
+      position: absolute;
+      top: 100px; /* Adjust this value as needed */
+      left: 10px;
+      color: white;
+      background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent black background */
+      padding: 5px;
+      font-family: Arial, sans-serif; /* Arial font */
+      font-size: 20px;
+      display: none; /* Hide the text by default */
+    }
+</style>
+</head>
+<body>
+  <canvas id="c"></canvas>
+  <p id="colorText">Current Frog Color: Pink (Default)</p>
+  <p id="descriptionText">Tip : You can change color of Frog's shirt by click the mouse to her shirt :P </p>
+  <button id="playSoundButton" class="play-sound-button">Play Backgroud Sound</button>
+  <p id="loadingText">Loading...</p>
+</body>
+<script type="module">
+
+//Import Three.js and other modules
+import * as THREE from 'https://threejsfundamentals.org/threejs/resources/threejs/r132/build/three.module.js';
+import {OrbitControls} from 'https://threejsfundamentals.org/threejs/resources/threejs/r132/examples/jsm/controls/OrbitControls.js';
+import {GLTFLoader} from 'https://threejsfundamentals.org/threejs/resources/threejs/r132/examples/jsm/loaders/GLTFLoader.js';
+
+let sound;
+let cloth_sound;
+function main() {
+  const canvas = document.querySelector('#c');
+  const renderer = new THREE.WebGLRenderer({canvas, antialias: false});
+
+  const fov = 45;
+  const aspect = 2;  // the canvas default
+  const near = 0.1;
+  const far = 100;
+  const camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
+  camera.position.set(1, 1, 1);
+
+  // Add the audio listener to the camera
+  let listener = new THREE.AudioListener();
+  camera.add(listener);
+
+  // Load the BG sound
+  sound = new THREE.Audio(listener);
+  let audioLoader = new THREE.AudioLoader();
+  audioLoader.load('song.mp3', function(buffer) {
+    sound.setBuffer(buffer);
+    sound.setLoop(true);
+    sound.setVolume(0.5);
+  });
+
+  // Load the cloth changing sound
+  cloth_sound = new THREE.Audio(listener);
+  audioLoader.load('cloth.mp3', function(buffer) {
+    cloth_sound.setBuffer(buffer);
+    cloth_sound.setLoop(false);
+    cloth_sound.setVolume(1);
+  });
+
+  // Play the BG sound when the button is clicked
+  document.getElementById('playSoundButton').addEventListener('click', () => {
+  if (!sound.isPlaying) {
+    console.log('Playing sound');
+    playSoundButton.textContent = 'Stop Backgroud Sound';
+
+    sound.play();
+  }
+  //Pause the BG sound when the button is clicked
+  else {
+    console.log('Pausing sound');
+    playSoundButton.textContent = 'Play Backgroud Sound';
+    sound.pause();
+  }
+  });
+
+  // Create the scene
+  const controls = new OrbitControls(camera, canvas);
+  controls.target.set(0, 0, 0);
+  controls.update();
+
+  const scene = new THREE.Scene();
+  scene.background = new THREE.Color('lightpink');
+
+  {
+    const planeSize = 10;
+
+    const loader = new THREE.TextureLoader();
+    // Show the loading text
+    document.getElementById('loadingText').style.display = 'block';
+
+    // Load the checker texture
+    const texture = loader.load('https://threejsfundamentals.org/threejs/resources/images/checker.png');
+    texture.wrapS = THREE.RepeatWrapping;
+    texture.wrapT = THREE.RepeatWrapping;
+    texture.magFilter = THREE.NearestFilter;
+    const repeats = planeSize / 2;
+    texture.repeat.set(repeats, repeats);
+
+    const planeGeo = new THREE.PlaneGeometry(planeSize, planeSize);
+    const planeMat = new THREE.MeshPhongMaterial({
+      map: texture,
+      side: THREE.DoubleSide,
+    });
+    const mesh = new THREE.Mesh(planeGeo, planeMat);
+    mesh.rotation.x = Math.PI * -.5;
+    mesh.position.y -= 10;
+    scene.add(mesh);
+  }
+  {
+    const skyColor = 0xB1E1FF;  // light blue
+    const groundColor = 0xB97A20;  // brownish orange
+    const intensity = 1;
+    const light = new THREE.HemisphereLight(skyColor, groundColor, intensity);
+    scene.add(light);
+  }
+
+  {
+    const color = 0xFFFFFF;
+    const intensity = 1;
+    const light = new THREE.DirectionalLight(color, intensity);
+    light.position.set(5, 10, 2);
+    scene.add(light);
+    scene.add(light.target);
+  }
+
+  function frameArea(sizeToFitOnScreen, boxSize, boxCenter, camera) {
+    const halfSizeToFitOnScreen = sizeToFitOnScreen * 0.5;
+    const halfFovY = THREE.MathUtils.degToRad(camera.fov * .5);
+    const distance = halfSizeToFitOnScreen / Math.tan(halfFovY) * 0.4;
+    // compute a unit vector that points in the direction the camera is now
+    // in the xz plane from the center of the box
+    const direction = (new THREE.Vector3())
+      .subVectors(camera.position, boxCenter)
+      .multiply(new THREE.Vector3(1, 0, 1))
+      .normalize();
+    // move the camera to a position distance units way from the center
+    // in whatever direction the camera was from the center already
+    camera.position.copy(direction.multiplyScalar(distance).add(boxCenter));
+
+    // pick some near and far values for the frustum that
+    // will contain the box.
+    camera.near = boxSize / 100;
+    camera.far = boxSize * 100;
+
+    camera.updateProjectionMatrix();
+
+    // point the camera to look at the center of the box
+    camera.lookAt(boxCenter.x, boxCenter.y, boxCenter.z);
+  }
+
+  //Initialize the frog_shirt_color variable
+  let TShirtYellow;
+  let TShirtPink;
+  let TShirtCloud;
+  let TShirtSky;
+  let TShirtWhite;
+
+  let geometry = new THREE.BoxGeometry(1, 1, 1); // Creates a 1x1x1 cube
+  let frog_shirt_material = new THREE.MeshBasicMaterial({color: 0x00ff00});
+  let frog_shirt = new THREE.Mesh(geometry, frog_shirt_material);
+  let defaultMaterial; // Store the default color
+
+  //โจทย์ lighting โดยใช้ directional light หรือ point light อย่างน้อย 1 ดวง
+  const light = new THREE.DirectionalLight(0xffffff, 0.1);
+  light.position.set(50, 50, 50);
+  scene.add(light);
+
+  // Create a point light with color white and intensity 0.5
+  const pointLight = new THREE.PointLight(0xffc0cb, 0.5);
+  // Set the position of the light
+  pointLight.position.set(50, 50, 50);
+  // Add the light to the scene
+  scene.add(pointLight);
+  {
+    const gltfLoader = new GLTFLoader();
+    //โจทย์ ใช้โมเดล obj หรือ gltf อย่างน้อย 1 โมเดล
+    gltfLoader.load('frog.gltf', (gltf) => {
+      document.getElementById('loadingText').style.display = 'none'; // Hide the loading text
+      // Show the color text
+      document.getElementById('colorText').style.display = 'block';
+      // Show the description text
+      document.getElementById('descriptionText').style.display = 'block';
+      document.getElementById('playSoundButton').style.display = 'block';
+      const root = gltf.scene;
+      root.scale.set(30, 30, 30); // Increase these values to make the object larger
+      scene.add(root);
+        //Initilize and Hide the TShirtYellow, TShirtCloud, TShirtSky, and TShirtWhite by default
+        TShirtYellow = root.getObjectByName('TShirtYellow');
+        if (TShirtYellow) {
+          TShirtYellow.visible = false; // Hide TShirtYellow
+        }
+        TShirtCloud = root.getObjectByName('TShirtCloud');
+        if (TShirtCloud) {
+          TShirtCloud.visible = false; // Hide TShirtCloud
+        }
+        TShirtSky = root.getObjectByName('TShirtSky');
+        if (TShirtSky) {
+          TShirtSky.visible = false; // Hide TShirtSky
+        }
+        TShirtWhite = root.getObjectByName('TShirtWhite');
+        if (TShirtWhite) {
+          TShirtWhite.visible = false; // Hide TShirtWhite
+        }
+        //Initialize the TShirtPink variable
+        TShirtPink = root.getObjectByName('TShirt'); 
+          
+      let chairObject = null;
+
+      //Print out the material type of each object (for debugging)
+      scene.traverse((object) => {
+        if (object.isMesh) {
+          console.log('Object:', object, 'Material type:', object.material.type);
+        }
+      });
+
+
+      //โจทย์ ใช้ Blinn-Phong, Phong, PBR หรือ toon shader บนวัตถุอย่างน้อย 1 ชิ้น
+      scene.traverse((object) => {
+        //Change the material of the tree from MeshPhysicalMaterial to MeshPhongMaterial
+        if (object.isMesh && (object.name === 'Tree1' || object.name === 'Tree1_1' 
+          || object.name === 'Tree1_2' || object.name === 'Tree2' || object.name === 'Tree2_1' || object.name === 'Tree2_2' 
+          || object.name === 'Tree3'||object.name === 'Tree3_1' || object.name === 'Tree3_2')) {
+          console.log('Before change:', object.material);
+
+          let newMaterial = new THREE.MeshPhongMaterial({
+            color: object.material.color,
+            map: object.material.map,
+          });
+
+          object.material = newMaterial;
+          console.log('After change:', object.material);
+        }
+            if (object.isMesh && (object.name === 'Simple_Chair' || object.name === 'Simple_Chair001' || object.name === 'Table')) {
+              chairObject = object;
+              console.log(' Chair Before change:', object.material);
+              let newMaterial = new THREE.MeshPhongMaterial({
+                color: object.material.color,
+                map: object.material.map,
+                specular: 0x999999, // light gray
+                shininess: 100, // adjust this value to change the shininess
+              });
+              object.material = newMaterial;
+              console.log('Chair After change:', object.material);
+              if (chairObject) {
+                // Create a point light
+                const pointLight = new THREE.PointLight(0xffffff, 2, 100);
+                // Position the light at the chair object
+                pointLight.position.set(chairObject.position.x, chairObject.position.y, chairObject.position.z);
+                //uncomment line below to add point light into chair position
+                //scene.add(pointLight);
+                // Enable shadows in the renderer
+                renderer.shadowMap.enabled = true;
+
+                // Enable shadows for the light
+                pointLight.castShadow = true;
+
+                // Enable shadows for the chair
+                chairObject.castShadow = true;
+                chairObject.receiveShadow = true;
+                console.log('Chair position:', chairObject.position);
+              }
+            }
+            if (object.isMesh && (object.name === 'Head' || object.name === 'Body' || object.name === 'TShirt')) {
+              console.log('Frog Before change:', object.material);
+              let newMaterial = new THREE.MeshPhongMaterial({
+                color: object.material.color,
+                map: object.material.map,
+                // add other properties you need
+              });
+              object.material = newMaterial;
+              console.log('Frog After change:', object.material);
+            }    
+          });    
+      frog_shirt = root.getObjectByName('TShirt');
+
+      // compute the box that contains all the stuff
+      // from root and below
+      const box = new THREE.Box3().setFromObject(root);
+
+      const boxSize = 10 * box.getSize(new THREE.Vector3()).length();
+      const boxCenter = box.getCenter(new THREE.Vector3());
+      boxCenter.y += -45;
+      
+      // set the camera to frame the box
+      frameArea(boxSize / 12, boxSize / 12, boxCenter, camera); // Reduce the boxSize value
+      controls.maxDistance = boxSize * 5;
+      controls.target.copy(boxCenter);
+
+
+      controls.update();
+    });
+  }
+
+
+  let needRender = true; // Flag to check if we need to render
+
+  function resizeRendererToDisplaySize(renderer) {
+    const canvas = renderer.domElement;
+    const width = canvas.clientWidth;
+    const height = canvas.clientHeight;
+    const needResize = canvas.width !== width || canvas.height !== height;
+    // Resize the renderer if the canvas size has changed
+    if (needResize) {
+      renderer.setSize(width, height, false);
+      needRender = true; // Set the flag to true if we need to resize
+
+    }
+    return needResize;
+  }
+  let showPrompt = true;
+  function render(time) {
+    time *= 0.001;  // convert to seconds
+
+    // If the renderer size has changed, update the camera aspect ratio
+    if (resizeRendererToDisplaySize(renderer)) {
+      const canvas = renderer.domElement;
+      camera.aspect = canvas.clientWidth / canvas.clientHeight;
+      camera.updateProjectionMatrix();
+      //renderer.render(scene, camera);
+    }
+    // If we need to render the scene, do so and reset the flag
+    if (needRender) {
+      renderer.render(scene, camera);
+      needRender = false; // Reset the flag after rendering
+    }
+
+    // Create a raycaster and a vector for the mouse position
+    const raycaster = new THREE.Raycaster();
+    const mouse = new THREE.Vector2();
+    let isMouseOverFrogShirt = false;
+    let hasClickedOnFrogShirt = false;
+
+    // Add an event listener for the mousemove event
+    window.addEventListener('mousemove', (event) => {
+      // Update the mouse object with the current mouse position
+      mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+      mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+      // Update the raycaster with the current mouse position
+      raycaster.setFromCamera(mouse, camera);
+
+      // Check if the frog_shirt is under the mouse cursor
+      if (frog_shirt) {
+        const intersects = raycaster.intersectObject(frog_shirt, false);
+        isMouseOverFrogShirt = intersects.length > 0;
+      if (!isMouseOverFrogShirt) {
+        showPrompt = true; // Reset the flag when the mouse is not over the shirt
+      }
+    }
+    }, false);
+
+    //โจทย์ interaction -> UI คือมีปฏิสัมพันธ์กับผู้ใช้ ผ่าน UI
+    window.addEventListener('click', (event) => {
+      if (isMouseOverFrogShirt && showPrompt) {
+        console.log(showPrompt);
+        let color = window.prompt("What color do you want to change to? (Enter 'pink' 'yellow' 'cloud' 'sky' 'white')");
+        if (color === null || color === 'pink' || color === 'yellow' || color === 'cloud' || color === 'sky' || color === 'white') {
+          // User clicked "Cancel" or entered valid color value
+          console.log("User clicked 'Cancel' or entered valid color value");
+          showPrompt = false; // Stop showing the prompt
+        } 
+        if (color === 'pink') {
+          console.log("User entered 'pink'");
+          if(TShirtYellow.visible == true){
+            TShirtPink.visible = true; // show TShirtPink
+            TShirtYellow.visible = false; // hide TShirtYellow
+          }
+          if(TShirtCloud.visible == true){
+            TShirtCloud.visible = false; // hide TShirtCloud
+            TShirtPink.visible = true; // show TShirtPink
+          }
+          if(TShirtSky.visible == true){
+            TShirtSky.visible = false; // hide TShirtSky
+            TShirtPink.visible = true; // show TShirtPink
+          }
+          if(TShirtWhite.visible == true){
+            TShirtWhite.visible = false; // hide TShirtWhite
+            TShirtPink.visible = true; // show TShirtPink
+          }
+          cloth_sound.play();
+          document.getElementById('colorText').textContent = "Current Frog Color: Pink (Default)"; // Update the color text
+          isMouseOverFrogShirt = false; // Reset the flag
+        } 
+        else if (color === 'yellow') {
+          console.log("User entered 'yellow'");
+          if(TShirtPink.visible == true){
+            TShirtPink.visible = false; // hide TShirtPink
+            TShirtYellow.visible = true; // show TShirtYellow
+          }
+          if(TShirtCloud.visible == true){
+            TShirtCloud.visible = false; // hide TShirtCloud
+            TShirtYellow.visible = true; // show TShirtYellow
+          }
+          if(TShirtSky.visible == true){
+            TShirtSky.visible = false; // hide TShirtSky
+            TShirtYellow.visible = true; // show TShirtYellow
+          }
+          if(TShirtWhite.visible == true){
+            TShirtWhite.visible = false; // hide TShirtWhite
+            TShirtYellow.visible = true; // show TShirtYellow
+          }
+          cloth_sound.play();
+          document.getElementById('colorText').textContent = "Current Frog Color: Yellow"; // Update the color text
+          isMouseOverFrogShirt = false; // Reset the flag
+        } 
+        else if(color === 'cloud'){
+          console.log("User entered 'cloud'");
+          if(TShirtPink.visible == true){
+            TShirtPink.visible = false; // hide TShirtPink
+            TShirtCloud.visible = true; // show TShirtCloud
+          }
+          if(TShirtYellow.visible == true){
+            TShirtYellow.visible = false; // hide TShirtYellow
+            TShirtCloud.visible = true; // show TShirtCloud
+          }
+          if(TShirtSky.visible == true){
+            TShirtSky.visible = false; // hide TShirtSky
+            TShirtCloud.visible = true; // show TShirtCloud
+          }
+          if(TShirtWhite.visible == true){
+            TShirtWhite.visible = false; // hide TShirtWhite
+            TShirtCloud.visible = true; // show TShirtCloud
+          }
+          cloth_sound.play();
+          document.getElementById('colorText').textContent = "Current Frog Color: Cloud"; // Update the color text
+        }
+        else if(color === 'sky'){
+          console.log("User entered 'sky'");
+          if(TShirtPink.visible == true){
+            TShirtPink.visible = false; // hide TShirtPink
+            TShirtSky.visible = true; // show TShirtSky
+          }
+          if(TShirtYellow.visible == true){
+            TShirtYellow.visible = false; // hide TShirtYellow
+            TShirtSky.visible = true; // show TShirtSky
+          }
+          if(TShirtCloud.visible == true){
+            TShirtCloud.visible = false; // hide TShirtCloud
+            TShirtSky.visible = true; // show TShirtSky
+          }
+          if(TShirtWhite.visible == true){
+            TShirtWhite.visible = false; // hide TShirtWhite
+            TShirtSky.visible = true; // show TShirtSky
+          }
+          cloth_sound.play();
+          document.getElementById('colorText').textContent = "Current Frog Color: Sky"; // Update the color text
+        }
+        else if(color === 'white'){
+          console.log("User entered 'white'");
+          if(TShirtPink.visible == true){
+            TShirtPink.visible = false; // hide TShirtPink
+            TShirtWhite.visible = true; // show TShirtWhite
+          }
+          if(TShirtYellow.visible == true){
+            TShirtYellow.visible = false; // hide TShirtYellow
+            TShirtWhite.visible = true; // show TShirtWhite
+          }
+          if(TShirtCloud.visible == true){
+            TShirtCloud.visible = false; // hide TShirtCloud
+            TShirtWhite.visible = true; // show TShirtWhite
+          }
+          if(TShirtSky.visible == true){
+            TShirtSky.visible = false; // hide TShirtSky
+            TShirtWhite.visible = true; // show TShirtWhite
+          }
+          cloth_sound.play();
+          document.getElementById('colorText').textContent = "Current Frog Color: White"; // Update the color text
+        }
+        else {
+          alert("Invalid color. Please enter 'pink' 'yellow' 'cloud' 'sky' 'white'");
+        }
+      }
+    }, false);
+    renderer.render(scene, camera);
+    requestAnimationFrame(render);
+  }
+  requestAnimationFrame(render);
+}
+main();
+
+
+
+</script>
+</html>
+
