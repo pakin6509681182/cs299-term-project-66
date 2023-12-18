@@ -29,8 +29,10 @@ For 3D Modelling
 4. Selection: Users able to change a part of model by using mouse picking. In this project user can change the Frog's shirt by clicking her shirt.
 
 ## Dependencies
-- Python 3.6
-- Web Browser with Internet Connection
+- Python 3.6 (or any other local server)
+- Git (for cloning the project)
+- Internet Connection (for loading Three.js library)
+- Web Browser
 ## How to run the project
 1. Clone the project
     ```git
