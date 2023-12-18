@@ -1,5 +1,5 @@
 # CS299 1/66 - Term Project - Froggy
-![mainscreen](README_Picture\mainscreen.png)
+![mainscreen](README_Picture/mainscreen.png)
 ## What this Project do ?
 &nbsp;&nbsp;&nbsp;&nbsp;This project is a 3D model viewer that utilizes Three.js, a popular JavaScript library for creating and displaying animated 3D computer graphics in a web browser.  
 &nbsp;&nbsp;&nbsp;&nbsp;This project specifically focuses on displaying Frog models in the .gltf format. It also provides user interactives , It also provides interactive features that allow users to manipulate the 3D model in various ways.
@@ -7,14 +7,14 @@
 ## Feature
 ### Status Text
 - Provide status of current colour of Frog's shirt
-![colorstatus](README_Picture\colorstatus.png)
+![colorstatus](README_Picture/colorstatus.png)
 ### Shader & Lightning
 - Using Directional Light and Point Light
 - Using MeshPhongMaterials
 
 ### Backgroud Sound & Effect Sound
 - User can Play/Pause Backgroud Sound by pressing a button in top left corner
-![soundbutton](README_Picture\soundbutton.png)
+![soundbutton](README_Picture/soundbutton.png)
 - When user change the Frog's shirt . Will play the change cloth sound
 ### Interactions
 1. Rotation: Users can click and drag to rotate the 3D model, providing a 360-degree view of the object.
